@@ -39,15 +39,48 @@
             <button class="toggle-btn" id="calendar-view-btn"><i class="fas fa-calendar-alt"></i> Calendar</button>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off">
-            <select id="todo-priority" aria-label="Urgency">
-                <option value="low">Low</option>
-                <option value="medium" selected>Medium</option>
-                <option value="high">High</option>
-            </select>
-            <input type="date" id="todo-date" aria-label="Due Date">
-            <button id="add-btn"><i class="fas fa-plus"></i></button>
+        <div class="input-container">
+            <div class="primary-inputs">
+                <input type="text" id="todo-input" placeholder="What needs to be done?" autocomplete="off">
+                <button id="add-btn"><i class="fas fa-plus"></i></button>
+            </div>
+
+            <div class="secondary-inputs">
+                <div class="input-wrapper">
+                    <label><i class="fas fa-flag"></i> Priority</label>
+                    <select id="todo-priority" aria-label="Urgency">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="input-wrapper">
+                    <label><i class="far fa-calendar"></i> Date</label>
+                    <input type="date" id="todo-date" aria-label="Due Date">
+                </div>
+
+                <div class="input-wrapper">
+                    <label><i class="far fa-clock"></i> Start</label>
+                    <input type="time" id="start-time" aria-label="Start Time">
+                </div>
+
+                <div class="input-wrapper">
+                    <label><i class="far fa-clock"></i> End</label>
+                    <input type="time" id="end-time" aria-label="End Time">
+                </div>
+
+                <div class="input-wrapper">
+                    <label><i class="fas fa-bell"></i> Remind</label>
+                    <select id="reminder-offset" aria-label="Reminder">
+                        <option value="0">At time</option>
+                        <option value="30">30 min before</option>
+                        <option value="60">1 hour before</option>
+                        <option value="1440">1 day before</option>
+                        <option value="10080">1 week before</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="filters">
