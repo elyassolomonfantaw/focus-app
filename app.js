@@ -44,18 +44,38 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // Capture inputs in addTodo
     function addTodo() {
         const text = todoInput.value.trim();
         const date = todoDateInput.value;
         const priority = todoPriorityInput.value;
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+        const offset = reminderOffsetInput.value;
 
         if (text) {
-            const newTodo = createTodoItem(text, date, priority);
+            const newTodo = {
+                id: Date.now(),
+                text: text,
+                dueDate: date,
+                startTime: start,
+                endTime: end,
+                reminderOffset: offset,
+                priority: priority || 'medium',
+                completed: false,
+                notified: false,
+                createdAt: new Date().toISOString()
+            };
+
             todos.unshift(newTodo);
             saveTodos();
+
+            // Reset fields
             todoInput.value = '';
             todoDateInput.value = '';
-            todoPriorityInput.value = 'medium'; // Reset to default
+            startTimeInput.value = '';
+            endTimeInput.value = '';
+            todoPriorityInput.value = 'medium';
         }
     }
 
@@ -106,18 +126,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return due < today;
     }
 
+    // Update Render to show times
     function renderTodos() {
         todoList.innerHTML = '';
         const filteredTodos = getFilteredTodos();
 
         filteredTodos.forEach(todo => {
             const li = document.createElement('li');
-            li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+            li.className = `todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority}`;
 
             const isLate = isOverdue(todo.dueDate, todo.completed);
+
+            let timeDisplay = '';
+            if (todo.startTime) {
+                timeDisplay += ` • ${formatTime(todo.startTime)}`;
+                if (todo.endTime) {
+                    timeDisplay += ` - ${formatTime(todo.endTime)}`;
+                }
+            }
+
             const dateDisplay = todo.dueDate ?
                 `<span class="todo-date ${isLate ? 'overdue' : ''}">
-                    <i class="far fa-calendar"></i> ${formatDateDisplay(todo.dueDate)}
+                    <i class="far fa-calendar"></i> ${formatDateDisplay(todo.dueDate)}${timeDisplay}
                  </span>` : '';
 
             li.innerHTML = `
@@ -138,6 +168,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const activeCount = todos.filter(t => !t.completed).length;
         itemsLeft.textContent = `${activeCount} item${activeCount !== 1 ? 's' : ''} left`;
+    }
+
+    function formatTime(timeStr) {
+        // timeStr is HH:mm (24h)
+        if (!timeStr) return '';
+        const [hours, minutes] = timeStr.split(':');
+        let h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12;
+        h = h ? h : 12; // the hour '0' should be '12'
+        return `${h}:${minutes} ${ampm}`;
+    }
+
+    // isOverdue needs update to respect time?
+    function isOverdue(dateString, completed) {
+        if (!dateString || completed) return false;
+        const now = new Date();
+        const due = new Date(dateString);
+        due.setHours(23, 59, 59); // End of due day
+        return due < now;
     }
 
     function escapeHtml(text) {
@@ -217,6 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listeners
+    const startTimeInput = document.getElementById('start-time');
+    const endTimeInput = document.getElementById('end-time');
+    const reminderOffsetInput = document.getElementById('reminder-offset');
+
     addBtn.addEventListener('click', addTodo);
     todoInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addTodo();
@@ -297,27 +351,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Notification.permission !== 'granted') return;
 
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
 
         todos.forEach(todo => {
-            if (!todo.completed && todo.dueDate === todayStr && !todo.notified) {
-                // Determine if we should notify?
-                // Simple logic: If it's the due date and we haven't notified yet?
-                // Ideally we'd store a 'notified' flag to avoid spam.
-                // Let's modify todo structure slightly or just rely on a simple check.
-                // For this MVP, let's just notify if it's the day.
-                // To avoid spam, we really should check time, but we only have date.
-                // Let's just notify ONCE per session or if we add a 'notified' flag.
-                // Adding 'notified' flag logic dynamically:
+            if (!todo.completed && !todo.notified && todo.dueDate) {
 
-                if (!todo.hasBeenNotified) {
-                    new Notification('Task Due Today', {
-                        body: `Don't forget: ${todo.text}`,
+                // Logic: 
+                // 1. Construct the Task Start Time (Date + StartTime)
+                // 2. Subtract Reminder Offset (minutes)
+                // 3. Compare with 'now'
+
+                let taskDateTime;
+                if (todo.startTime) {
+                    taskDateTime = new Date(`${todo.dueDate}T${todo.startTime}`);
+                } else {
+                    // Default to 9 AM if no time set but date exists
+                    taskDateTime = new Date(`${todo.dueDate}T09:00:00`);
+                }
+
+                const offsetMinutes = parseInt(todo.reminderOffset || 0);
+                const notificationTime = new Date(taskDateTime.getTime() - offsetMinutes * 60000);
+
+                // Notify if within the minute of the trigger time (or slightly past it if missed)
+                // We check if now >= notificationTime AND now < notificationTime + 5 mins (window)
+                // actually simplest is just: if now > notificationTime && !notified
+
+                if (now >= notificationTime) {
+                    new Notification(todo.text, {
+                        body: `Reminder: Task is starting soon (${todo.startTime || 'Today'})`,
                         icon: 'https://cdn-icons-png.flaticon.com/512/906/906334.png'
                     });
 
-                    // Update todo to avoid repeat notification
-                    todo.hasBeenNotified = true;
+                    todo.notified = true;
                     saveTodos();
                 }
             }
