@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus | Premium Todo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Focus">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
+</head>
+
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Focus.</h1>
+            <p>What's your main goal for today?</p>
+            <button id="notify-btn" class="notify-btn" title="Enable Notifications" style="display: none;">
+                <i class="fas fa-bell"></i> Enable Alerts
+            </button>
+        </header>
+
+        <div class="view-toggle">
+            <button class="toggle-btn active" id="list-view-btn"><i class="fas fa-list"></i> List</button>
+            <button class="toggle-btn" id="calendar-view-btn"><i class="fas fa-calendar-alt"></i> Calendar</button>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="todo-input" placeholder="Add a new task..." autocomplete="off">
+            <select id="todo-priority" aria-label="Urgency">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+            </select>
+            <input type="date" id="todo-date" aria-label="Due Date">
+            <button id="add-btn"><i class="fas fa-plus"></i></button>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </div>
+
+        <div id="list-view-container">
+            <ul id="todo-list" class="todo-list">
+                <!-- Tasks will be injected here -->
+            </ul>
+        </div>
+
+        <div id="calendar-view-container" class="hidden">
+            <div class="calendar-header">
+                <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="current-month">Month Year</h3>
+                <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- Calendar Generated via JS -->
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span id="items-left">0 items left</span>
+            <button id="clear-completed">Clear Completed</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
